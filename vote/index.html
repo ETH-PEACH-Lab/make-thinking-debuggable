@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vote</title>
+<style>
+  body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#fff;color:#111;display:flex;flex-direction:column;min-height:100vh}
+  main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 22px;gap:22px;max-width:520px;margin:0 auto;width:100%;box-sizing:border-box}
+  h1{font-size:22px;font-weight:600;line-height:1.35;margin:0}
+  code{background:#f3f3f3;border-radius:6px;padding:2px 8px;font-size:19px}
+  button{font:inherit;font-size:26px;text-align:left;padding:20px 22px;border-radius:16px;border:3px solid #ddd;background:#fff;display:flex;gap:16px;align-items:center}
+  button b{color:#d9480f;min-width:28px}
+  button:active{background:#f6f6f6}
+  button.sel{border-color:#d9480f;background:#fff4ee}
+  button:disabled:not(.sel){opacity:.45}
+  .done{font-size:20px;color:#666;text-align:center;min-height:1.4em}
+  footer{font-size:13px;color:#aaa;text-align:center;padding:14px}
+</style></head><body>
+<main>
+  <h1>How many times would we flip the pancakes for <code>[4, 2, 5, 1]</code>?</h1>
+  <button data-v="A"><b>A</b> 4</button>
+  <button data-v="B"><b>B</b> 6</button>
+  <button data-v="C"><b>C</b> 8</button>
+  <div class="done" id="done"></div>
+</main>
+<footer>From Junior to Senior in the Age of AI · April Wang · ETH Zürich</footer>
+<script>
+  const DB = 'https://awesome-presentation-788e7-default-rtdb.firebaseio.com';
+  const PATH = 'talks/chci-2026/q1';
+  const KEY = 'voted:' + PATH;
+  const btns = [...document.querySelectorAll('button')];
+  function lock(v) { btns.forEach(b => { b.disabled = true; b.classList.toggle('sel', b.dataset.v === v); }); document.getElementById('done').textContent = 'Thanks — look at the screen.'; }
+  const prev = localStorage.getItem(KEY); if (prev) lock(prev);
+  btns.forEach(b => b.addEventListener('click', async () => {
+    const v = b.dataset.v; lock(v); localStorage.setItem(KEY, v);
+    try {                                          // atomic increment via RTDB transaction-free trick: use .json?x-http-method-override is not available; do read-modify-write once (collisions are rare at talk scale)
+      const r = await fetch(`${DB}/${PATH}/${v}.json`); const n = (await r.json()) || 0;
+      await fetch(`${DB}/${PATH}/${v}.json`, { method: 'PUT', body: JSON.stringify(n + 1) });
+    } catch (e) { document.getElementById('done').textContent = 'Could not send — raise your hand instead 🙋'; }
+  }));
+</script>
+</body></html>

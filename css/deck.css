@@ -1,0 +1,108 @@
+/* ---------- Deck engine styles ---------- */
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --muted: #7a7a7a;
+  --line: #e3e3e3;
+  --accent: #d9480f;      /* pancake-ish orange, used sparingly */
+  --ok: #2b8a3e;
+  --bad: #c92a2a;
+  --warn: #e67700;
+  --code-bg: #f6f6f6;
+  --font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --W: 1920px;
+  --H: 1080px;
+}
+
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: var(--font); color: var(--fg); }
+
+#stage {
+  position: absolute; left: 50%; top: 50%;
+  width: var(--W); height: var(--H);
+  transform-origin: 0 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+section.slide {
+  position: absolute; inset: 0;
+  display: none;
+  padding: 80px 120px 110px;
+  box-sizing: border-box;
+  font-size: 40px;
+  line-height: 1.35;
+}
+section.slide.active { display: block; }
+section.slide.center { display: none; }
+section.slide.center.active { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+
+section.slide aside.notes { display: none; }
+
+h1 { font-size: 96px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; margin: 0 0 24px; }
+h2 { font-size: 64px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.1; margin: 0 0 32px; }
+h3 { font-size: 44px; font-weight: 600; margin: 0 0 16px; }
+p  { margin: 0 0 20px; }
+.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+.small { font-size: 28px; }
+.kicker { font-size: 28px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 24px; }
+
+code, pre { font-family: var(--mono); }
+pre { background: var(--code-bg); border-radius: 12px; padding: 28px 32px; font-size: 30px; line-height: 1.45; overflow: hidden; margin: 0; }
+
+/* Static "beat" elements: hidden until their beat index is reached */
+.slide .sub { font-size: 44px; line-height: 1.4; margin-top: 18px; color: #333; }
+.beat { visibility: hidden; opacity: 0; transition: opacity .25s ease; }
+.beat.on { visibility: visible; opacity: 1; }
+
+/* Progress + slide number (tiny, bottom right) */
+.ptag { position: absolute; right: 56px; top: 34px; font-size: 22px; color: #666; letter-spacing: .02em; z-index: 30; }
+.ptag .sep { color: #ccc; margin: 0 8px; }
+#hud { position: absolute; right: 40px; bottom: 34px; height: 40px; line-height: 40px; padding: 0 10px; font-size: 20px; color: #bbb; font-variant-numeric: tabular-nums; cursor: pointer; padding: 6px 10px; border-radius: 8px; z-index: 40; }
+#hud:hover { background: rgba(0,0,0,.05); color: #666; }
+/* table of contents overlay */
+#toc { position: absolute; inset: 0; z-index: 50; background: rgba(20,20,20,.45); display: none; align-items: center; justify-content: center; }
+#toc.on { display: flex; }
+#toc .tocbox { width: 820px; max-height: 1000px; background: #fff; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.35); overflow: hidden; display: flex; flex-direction: column; }
+#toc .tochead { padding: 22px 30px; font-size: 26px; font-weight: 600; border-bottom: 1px solid #eee; display: flex; align-items: baseline; justify-content: space-between; }
+#toc .tochead .hint { font-size: 16px; font-weight: 400; color: #999; }
+#toc ol { list-style: none; margin: 0; padding: 10px 0; overflow: auto; }
+#toc li { display: grid; grid-template-columns: 56px 1fr auto; gap: 16px; align-items: center; padding: 8px 30px; font-size: 22px; cursor: pointer; }
+#toc li:hover { background: #f4f4f4; }
+#toc li.cur { background: #fff4ee; }
+#toc li .n { color: #aaa; font-variant-numeric: tabular-nums; }
+#toc li.cur .n { color: var(--accent, #d9480f); font-weight: 600; }
+#toc li .b { font-size: 16px; color: #bbb; }
+#foot { position: absolute; left: 56px; bottom: 34px; height: 40px; display: flex; align-items: center; gap: 0; font-size: 22px; line-height: 40px; color: #888; letter-spacing: .01em; z-index: 30; white-space: nowrap; }
+#foot .logo { height: 36px; width: auto; display: block; opacity: .9; position: relative; top: -5px; }
+#foot .logo-text { font-weight: 700; color: #555; font-size: 20px; letter-spacing: .02em; }
+#foot a { color: #888; text-decoration: none; border-bottom: 1px solid #ccc; }
+#foot a:hover { color: var(--accent); border-color: var(--accent); }
+#foot .sep { width: 1px; height: 22px; background: #ddd; margin: 0 18px; align-self: center; }
+#progress { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--accent); width: 0; transition: width .2s; }
+
+/* Fallback overlay (V key) */
+#fallback { position: absolute; inset: 0; background: #fff; display: none; z-index: 50; }
+#fallback.on { display: block; }
+#fallback img { width: 100%; height: 100%; object-fit: contain; }
+#fallback .tag { position: absolute; left: 24px; top: 20px; font-size: 20px; color: #bbb; }
+
+/* Print: one slide per page, final state */
+@media print {
+  html, body { background: #fff; overflow: visible; }
+  #stage { position: static; transform: none !important; width: auto; height: auto; }
+  section.slide { display: block !important; position: relative; width: var(--W); height: var(--H); page-break-after: always; }
+  .beat { visibility: visible !important; opacity: 1 !important; }
+  #hud, #progress, #fallback, #toc, #foot { display: none !important; }
+}
+
+/* ---------- Shared demo chrome ---------- */
+.window {
+  border: 1px solid var(--line); border-radius: 16px; background: #fff;
+  box-shadow: 0 8px 40px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+.window .bar { height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fafafa; }
+.window .bar i { width: 12px; height: 12px; border-radius: 50%; background: #ddd; display: inline-block; }
+.window .bar span { margin-left: 12px; font-size: 20px; color: var(--muted); }

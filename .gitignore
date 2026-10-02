@@ -1,0 +1,11 @@
+# Planning / notes — not part of the hosted deck
+*.md
+script_v2/
+
+# Dev tooling (screenshots, recording, QR generation)
+tools/
+
+# OS / editor
+.DS_Store
+.vscode/
+node_modules/
